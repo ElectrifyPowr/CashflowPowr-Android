@@ -3,6 +3,9 @@ package com.truepowr.cashflowpowr;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +18,15 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    public final int ID_HOME = 0, ID_HISTORY = 1, ID_STATS = 2, ID_SETTINGS = 3;
+    private final int[] theIds = new int[]{ID_HOME, ID_HISTORY, ID_STATS, ID_SETTINGS};
+    private Fragment[] allFragments = new Fragment[]{
+            new HomeFragment(), new HistoryFragment(), new StatisticsFragment(), new SettingsFragment()
+    };
+    private int[] fragmentLayouts = new int[]{
+            R.id.home_fragment, R.id.history_fragment, R.id.statistics_fragment, R.id.settings_fragment
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +52,8 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        switchFragments(ID_HOME);
     }
 
     @Override
@@ -80,22 +94,48 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_home) {
+            switchFragments(ID_HOME);
+        } else if (id == R.id.nav_history) {
+            switchFragments(ID_HISTORY);
+        } else if (id == R.id.nav_statistics) {
+            switchFragments(ID_STATS);
+        } else if (id == R.id.nav_settings) {
+            switchFragments(ID_SETTINGS);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void switchFragments(int id){
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+
+        for (int i=0; i<theIds.length; i++){
+            if (id==theIds[i]){
+                //show selected fragment
+                if (fm.findFragmentById(fragmentLayouts[i]) != null) {
+                    //if the fragment exists, show it.
+                    transaction.show(fm.findFragmentById(fragmentLayouts[i]));
+                } else {
+                    //if the fragment does not exist, add it to fragment manager.
+                    transaction.add(fragmentLayouts[i], allFragments[i]);
+                }
+
+                //hide other fragments
+                for (int j=0; j<theIds.length; j++){
+                    if (j != i){
+                        if (fm.findFragmentById(fragmentLayouts[j]) != null) {
+                            transaction.hide(fm.findFragmentById(fragmentLayouts[j]));
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        transaction.commit();
+    }
+
 }
